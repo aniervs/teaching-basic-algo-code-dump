@@ -1,4 +1,5 @@
 import random 
+from merge_sort import merge_sort 
 from tqdm import tqdm 
 
 def insertion_sort(array: list[int]) -> None:
@@ -69,21 +70,18 @@ def count_sort(array: list[int]) -> None:
             last_position += 1 
         
     
-    
-    
-    
-
 def stress():
     for _ in tqdm(range(10000)):
-        n = 100
+        n = 10000
         arr = [
-            random.randint(-10, 10) for _ in range(n)
+            random.randint(-100, 100) for _ in range(n)
         ]
         sorted_arr = sorted(arr) # this is the built-in sorting method in Python
         # insertion_sort(arr) # this is our sorting function (insertion sort)
         # selection_sort(arr) # this is our sorting function (selection sort)
-        bubble_sort(arr)
-        if arr != sorted_arr:
+        # bubble_sort(arr)
+        merge_sort_array = merge_sort(arr)
+        if merge_sort_array != sorted_arr:
             print(f"{arr} is not the expected sorted array")
             print(f"expected sorted array: {sorted_arr}")
             raise AssertionError("Wrong sorting!")
@@ -92,4 +90,5 @@ def stress():
     print("All tests passed! Congrats.")
             
 
-stress()
+if __name__ == '__main__':
+    stress()
