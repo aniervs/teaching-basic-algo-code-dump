@@ -1,4 +1,5 @@
 from generator import generator
+from validator import validate_mst
 from prim import prim_n2, prim_mlogn
 from kruskal import kruskal
 
