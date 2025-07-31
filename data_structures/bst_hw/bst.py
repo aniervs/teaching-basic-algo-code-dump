@@ -96,11 +96,25 @@ class BinarySearchTree:
 
 	def successor(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return the node in the subtree rooted at x with the smallest key greater than x's key."""
-		raise NotImplementedError()
+		if x.right != self.nil:
+			return self.minimum(x.right)
+		else:
+			y = x.parent
+			while y != self.nil and x == y.right:
+				x = y
+				y = y.parent
+			return y  # y is the successor of x, or self.nil if x is the largest key in the tree
 
 	def predecessor(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return the node in the subtree rooted at x with the greatest key less than x's key."""
-		raise NotImplementedError()
+		if x.left != self.nil:
+			return self.maximum(x.left)
+		else:
+			y = x.parent
+			while y != self.nil and x == y.left:
+				x = y
+				y = y.parent
+			return y  
 
 	def tree_insert(self, data):
 		"""Initialize a node with data and insert into this binary search tree."""
@@ -114,7 +128,21 @@ class BinarySearchTree:
 	# Helper method for inserting a node.  Assumes that node z is already created and initialized.
 	def tree_insert_node(self, z: BinarySearchTreeNode):
 		"""Insert node z into this binary search tree."""
-		raise NotImplementedError()
+		x = self.root
+		y = self.nil 
+		while x != self.nil:  
+			y = x
+			if self.get_key(z.data) < self.get_key(x.data):
+				x = x.left
+			else:
+				x = x.right
+		z.parent = y  
+		if y == self.nil: 
+			self.root = z  
+		elif self.get_key(z.data) < self.get_key(y.data):
+			y.left = z
+		else:
+			y.right = z
 
 	def transplant(self, u: BinarySearchTreeNode, v: BinarySearchTreeNode):
 		"""Replace the subtree rooted at node u with the subtree rooted at node v."""
