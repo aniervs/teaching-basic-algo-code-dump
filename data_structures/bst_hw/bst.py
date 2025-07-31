@@ -65,7 +65,13 @@ class BinarySearchTree:
 
 	def search(self, x: BinarySearchTreeNode, k) -> BinarySearchTreeNode:
 		"""Return a node with a given key k in the subtree rooted at x, or self.nil if no node with key k exists."""
-		raise NotImplementedError()
+		if x == self.nil or self.get_key(x.data) == k:
+			return x
+		elif self.get_key(x.data) < k:
+			return self.search(x.right, k)
+		elif self.get_key(x.data) > k:
+			return self.search(x.left, k)
+
 
 	def iterative_search(self, x: BinarySearchTreeNode, k) -> BinarySearchTreeNode:
 		"""Return a node with a given key k in the subtree rooted at x, or self.nil if no node with key k exists."""
