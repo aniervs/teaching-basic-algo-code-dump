@@ -169,6 +169,20 @@ class BinarySearchTree:
 		"""
 		if z is None or z == self.nil:
 			raise RuntimeError("Cannot delete sentinel or None node.")
+		elif z.left == self.nil:  # z has no left child
+			transplant(z, z.right)  # replace z with its right child
+		elif z.right == self.nil:
+			transplant(z, z.left)
+		else:
+			y = self.minimum(z.right)
+			if y != z.right:
+				transplant(y, y.right)  # transplant y with its right child
+				y.right = z.right        
+				y.right.parent = y 
+			transplant(z, y)  
+			y.left = z.left
+			y.left.parent = y   
+
 
 		raise NotImplementedError()
 
