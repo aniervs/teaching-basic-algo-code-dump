@@ -58,7 +58,10 @@ class BinarySearchTree:
 		func -- function to run on each node in the subtree.  If omitted, print.
 		"""
 		# Run func on the key of the root in between visiting the left and right subtrees.
-		raise NotImplementedError()
+		if x != self.nil:
+			self.inorder_tree_walk(x.left, func)
+			func(x.data)
+			self.inorder_tree_walk(x.right, func)
 
 	def search(self, x: BinarySearchTreeNode, k) -> BinarySearchTreeNode:
 		"""Return a node with a given key k in the subtree rooted at x, or self.nil if no node with key k exists."""
