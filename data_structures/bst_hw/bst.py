@@ -5,6 +5,9 @@
 # ]
 # ///
 
+import numpy as np
+from key_object import KeyObject
+
 class BinarySearchTreeNode:
 
 	def __init__(self, data):
@@ -220,9 +223,6 @@ class BinarySearchTree:
 
 # Testing
 if __name__ == "__main__":
-
-	import numpy as np
-
 	# Insert. 
 	binary_tree1 = BinarySearchTree()
 	array1 = np.arange(0, 100, 13)
@@ -279,6 +279,20 @@ if __name__ == "__main__":
 		binary_tree2.tree_delete(binary_tree2.search(binary_tree2.get_root(), value))
 		print(binary_tree2.is_BST())
 		print(binary_tree2)
+
+	# Binary tree of objects. 
+	binary_tree3 = BinarySearchTree(KeyObject.get_key)
+	states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "HI", "NH", "NY"]
+	list3 = []
+	for i in range(len(states)):
+		list3.append(KeyObject(states[i], i))
+	array3 = np.array(list3)
+	np.random.shuffle(array3)
+	for x in array3:
+		binary_tree3.tree_insert(x)
+	print(binary_tree3.is_BST())
+	print(binary_tree3)
+
 
 	# If get_key not provided, must define __gt__ or __lt__ for objects in the BST.
 	binary_tree4 = BinarySearchTree()

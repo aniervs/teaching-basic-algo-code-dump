@@ -1,5 +1,5 @@
 import random 
-from merge_sort import merge_sort 
+from sorting.merge_sort import merge_sort 
 from tqdm import tqdm 
 
 def insertion_sort(array: list[int]) -> None:
