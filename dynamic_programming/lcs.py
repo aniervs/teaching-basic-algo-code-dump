@@ -1,4 +1,4 @@
-from lis import memoizer
+from dynamic_programming.lis import memoizer
 
 a = "abcdt"
 b = "aczdw"
