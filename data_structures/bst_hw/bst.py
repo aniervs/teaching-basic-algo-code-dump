@@ -75,7 +75,12 @@ class BinarySearchTree:
 
 	def iterative_search(self, x: BinarySearchTreeNode, k) -> BinarySearchTreeNode:
 		"""Return a node with a given key k in the subtree rooted at x, or self.nil if no node with key k exists."""
-		raise NotImplementedError()
+		while x != self.nil and self.get_key(x.data) != k:
+			if self.get_key(x.data) < k:
+				x = x.right
+			else:
+				x = x.left
+		return x
 
 	def minimum(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return a node in subtree rooted at x with the smallest key."""
