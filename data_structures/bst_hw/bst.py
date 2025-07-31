@@ -84,11 +84,15 @@ class BinarySearchTree:
 
 	def minimum(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return a node in subtree rooted at x with the smallest key."""
-		raise NotImplementedError()
+		while x.left != self.nil:
+			x = x.left
+		return x
 
 	def maximum(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return a node in subtree rooted at x with the largest key."""
-		raise NotImplementedError()
+		while x.right != self.nil:
+			x = x.right
+		return x	
 
 	def successor(self, x: BinarySearchTreeNode) -> BinarySearchTreeNode:
 		"""Return the node in the subtree rooted at x with the smallest key greater than x's key."""
