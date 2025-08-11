@@ -1,10 +1,10 @@
 import heapq
 
-def prim_n2(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
+def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
     """
     n: number of nodes (the nodes are labeled from 0 to n - 1)
     edges_list: list of edges in the graph.
-        Each edge is a tuple (a,b,w)
+        Each edge is a tuple (a, b, w)
             where a and b are the labels of the vertices
             and w is the weight of that edge
     
@@ -14,9 +14,39 @@ def prim_n2(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
         
     algorithm: Prim's algorithm without priority queue, in O(n^2) time
     """
-    
-    raise NotImplementedError()
+    # Step 1: Initialize keys, parents, and visited set
+    key = [float('inf')] * n  # Minimum weight to connect each node
+    parent = [-1] * n         # Parent of each node in the MST
+    in_mst = [False] * n      # Tracks nodes already in the MST
 
+    # Start from the first node
+    key[0] = 0
+
+    # Step 2: Iterate to find the MST
+    for _ in range(n):
+        # Find the node with the smallest key value that is not in the MST
+        u = -1
+        min_key = float('inf')
+        for i in range(n):
+            if not in_mst[i] and key[i] < min_key:
+                min_key = key[i]
+                u = i
+
+        # Add the selected node to the MST
+        in_mst[u] = True
+
+        # Update the keys and parents of adjacent nodes
+        for idx, (a, b, w) in enumerate(edges_list):
+            if a == u or b == u:  # Check if the edge is connected to u
+                v = b if a == u else a
+                if not in_mst[v] and w < key[v]:
+                    key[v] = w
+                    parent[v] = idx
+
+    # Step 3: Collect the indices of the edges in the MST
+    mst_edges_idx = [parent[i] for i in range(1, n) if parent[i] != -1]
+
+    return mst_edges_idx
 
 def prim_mlogn(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
     """
