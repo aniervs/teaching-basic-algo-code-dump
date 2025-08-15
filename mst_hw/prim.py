@@ -14,6 +14,9 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
         
     algorithm: Prim's algorithm without priority queue, in O(n^2) time
     """
+    if n <= 1:
+        return []
+    
     # Step 1: Initialize keys, parents, and visited set
     key = [float('inf')] * n  # Minimum weight to connect each node
     parent = [-1] * n         # Parent of each node in the MST
@@ -32,6 +35,10 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
                 min_key = key[i]
                 u = i
 
+        # If no node is reachable, the graph is disconnected
+        if u == -1 or min_key == float('inf'):
+            break
+
         # Add the selected node to the MST
         in_mst[u] = True
 
@@ -44,7 +51,10 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
                     parent[v] = idx
 
     # Step 3: Collect the indices of the edges in the MST
-    mst_edges_idx = [parent[i] for i in range(1, n) if parent[i] != -1]
+    mst_edges_idx = []
+    for i in range(1, n):
+        if parent[i] != -1:
+            mst_edges_idx.append(parent[i])
 
     return mst_edges_idx
 
@@ -62,6 +72,34 @@ def prim_mlogn(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
         
     algorithm: Prim's algorithm with priority queue, in O(m \log n) time
     """
+    if n <= 1:
+        return []
     
-    raise NotImplementedError()
+    # Build adjacency list with edge indices
+    adj = [[] for _ in range(n)]
+    for idx, (a, b, w) in enumerate(edges_list):
+        adj[a].append((b, w, idx))
+        adj[b].append((a, w, idx))
+    
+    # Initialize
+    in_mst = [False] * n
+    min_heap = [(0, 0, -1)]  # (weight, vertex, edge_index)
+    mst_edges = []
+    
+    while min_heap and len(mst_edges) < n - 1:
+        weight, u, edge_idx = heapq.heappop(min_heap)
+        
+        if in_mst[u]:
+            continue
+            
+        in_mst[u] = True
+        if edge_idx != -1:  # Skip the starting vertex
+            mst_edges.append(edge_idx)
+        
+        # Add all adjacent edges to the heap
+        for v, w, idx in adj[u]:
+            if not in_mst[v]:
+                heapq.heappush(min_heap, (w, v, idx))
+    
+    return mst_edges
 
