@@ -67,7 +67,7 @@ def prim_mlogn(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
         each index corresponds to the index of an edge in the original list
         be sure to use the original indices and not the ones of the sorted list
         
-    algorithm: Prim's algorithm with priority queue, in O(m \log n) time
+    algorithm: Prim's algorithm with priority queue, in O(m * log n) time
     """
     if n <= 1:
         return []
@@ -78,22 +78,25 @@ def prim_mlogn(n: int, edges_list: list[tuple[int,int,int]]) -> list[int]:
         adj[a].append((b, w, idx))
         adj[b].append((a, w, idx))
     
-    # Initialize
+    # Initialize data structures
     in_mst = [False] * n
     min_heap = [(0, 0, -1)]  # (weight, vertex, edge_index)
     mst_edges = []
     
+    # Main algorithm loop
     while min_heap and len(mst_edges) < n - 1:
         weight, u, edge_idx = heapq.heappop(min_heap)
         
+        # Skip if vertex already in MST (handles duplicate entries)
         if in_mst[u]:
             continue
             
+        # Add vertex to MST
         in_mst[u] = True
-        if edge_idx != -1:  # Skip the starting vertex
+        if edge_idx != -1:  # Skip the starting vertex (has no incoming edge)
             mst_edges.append(edge_idx)
         
-        # Add all adjacent edges to the heap
+        # Add all edges from u to vertices not yet in MST
         for v, w, idx in adj[u]:
             if not in_mst[v]:
                 heapq.heappush(min_heap, (w, v, idx))
