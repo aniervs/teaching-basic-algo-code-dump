@@ -17,15 +17,14 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
     if n <= 1:
         return []
     
-    # Step 1: Initialize keys, parents, and visited set
-    key = [float('inf')] * n  # Minimum weight to connect each node
-    parent = [-1] * n         # Parent of each node in the MST
-    in_mst = [False] * n      # Tracks nodes already in the MST
-
+    #Initialize keys, parents, and visited set
+    key = [float('inf')] * n  
+    parent = [-1] * n         
+    in_mst = [False] * n      
     # Start from the first node
     key[0] = 0
 
-    # Step 2: Iterate to find the MST
+    # Iterate to find the MST
     for _ in range(n):
         # Find the node with the smallest key value that is not in the MST
         u = -1
@@ -39,10 +38,8 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
         if u == -1 or min_key == float('inf'):
             break
 
-        # Add the selected node to the MST
         in_mst[u] = True
 
-        # Update the keys and parents of adjacent nodes
         for idx, (a, b, w) in enumerate(edges_list):
             if a == u or b == u:  # Check if the edge is connected to u
                 v = b if a == u else a
@@ -50,7 +47,7 @@ def prim_n2(n: int, edges_list: list[tuple[int, int, int]]) -> list[int]:
                     key[v] = w
                     parent[v] = idx
 
-    # Step 3: Collect the indices of the edges in the MST
+    # Collect the indices of the edges in the MST
     mst_edges_idx = []
     for i in range(1, n):
         if parent[i] != -1:
