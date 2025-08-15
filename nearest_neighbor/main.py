@@ -29,9 +29,14 @@ def naive_knn(all_points, query_point, k):
     2.  Sort this list based on the distances.
     3.  Return the points from the first `k` tuples in the sorted list.
     """
-    # --- YOUR IMPLEMENTATION HERE ---
-    return [] # Placeholder
-
+    # Create list of (distance_sq, point) tuples
+    distances = [(distance_sq(query_point, point), point) for point in all_points]
+    
+    # Sort by distance
+    distances.sort(key=lambda x: x[0])
+    
+    # Return the first k points
+    return [point for _, point in distances[:k]]
 
 def main():
     """Main function to run the performance comparison."""

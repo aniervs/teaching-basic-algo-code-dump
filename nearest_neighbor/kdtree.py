@@ -50,8 +50,17 @@ class KDTree:
             return None
 
         # --- YOUR IMPLEMENTATION HERE ---
+        axis = depth % self.dim
+        points.sort(key=lambda x: x[axis])
+        median_index = len(points) // 2
+        node = self.Node(
+            point=points[median_index],
+            axis=axis,
+            left=self._build(points[:median_index], depth + 1),
+            right=self._build(points[median_index + 1:], depth + 1)
+        )
 
-        return None # Placeholder
+        return node
 
     def _knn_search(self, node, query_point, k, neighbors):
         """
@@ -84,8 +93,39 @@ class KDTree:
         if node is None:
             return
 
-        # --- YOUR IMPLEMENTATION HERE ---
-        pass
+        # Calculate squared distance from current node's point to query_point
+        distance = self._distance_sq(node.point, query_point)
+        
+        # Update the neighbors heap
+        if len(neighbors) < k:
+            # If we don't have k neighbors yet, just add this point
+            heapq.heappush(neighbors, (-distance, node.point))
+        elif distance < -neighbors[0][0]:  # Current point is closer than farthest neighbor
+            # Remove the farthest neighbor and add current point
+            heapq.heappop(neighbors)
+            heapq.heappush(neighbors, (-distance, node.point))
+        
+        # Determine which side to search first
+        axis = node.axis
+        if query_point[axis] < node.point[axis]:
+            near_side = node.left
+            far_side = node.right
+        else:
+            near_side = node.right
+            far_side = node.left
+        
+        # Recursively search the "near" side
+        self._knn_search(near_side, query_point, k, neighbors)
+        
+        # Backtracking/Pruning Step: Check if far side needs to be searched
+        if len(neighbors) < k:
+            # We don't have k neighbors yet, so search the far side
+            self._knn_search(far_side, query_point, k, neighbors)
+        else:
+            # Calculate distance to the splitting plane
+            plane_distance = (query_point[axis] - node.point[axis]) ** 2
+            if plane_distance < -neighbors[0][0]:
+                self._knn_search(far_side, query_point, k, neighbors)
 
     # ------------------------------------------------------------------
     # PUBLIC METHOD (PROVIDED)
