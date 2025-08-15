@@ -1,31 +1,70 @@
 import random
+from typing import List, Tuple
 
-def generator(n: int, p: float) -> list[tuple[int, int, int]]:
+def generator(n: int, p: float, weight_range: Tuple[int, int] = (1, 10000), seed: int = None) -> List[Tuple[int, int, int]]:
     """
-    n: number of nodes
-    p: probability of inserting an edge
+    Generate a connected undirected weighted graph with n vertices.
     
-    Generates a connected graph with n nodes and edge density controlled by p.
+    Args:
+        n: Number of vertices (labeled 0 to n-1)
+        p: Probability of including each edge (0 <= p <= 1)
+        weight_range: Range for random edge weights (min, max)
+        seed: Random seed for reproducibility
+        
+    Returns:
+        List of edges as tuples (u, v, weight) where u < v
     """
-    assert n >= 1, 'the number of nodes should be at least 1'
-    assert 0 < p <= 1, 'the density should be in the interval (0, 1]'
-    
+    if seed is not None:
+        random.seed(seed)
+        
+    if n <= 0:
+        return []
+    if n == 1:
+        return []
+        
+    # Validate inputs
+    if not 0 <= p <= 1:
+        raise ValueError("p must be between 0 and 1")
+        
+    min_weight, max_weight = weight_range
     edges = []
     
-    # Step 1: Create a spanning tree to ensure the graph is connected
-    nodes = list(range(n))
-    random.shuffle(nodes)
-    for i in range(1, n):
-        u = nodes[i - 1]
-        v = nodes[i]
-        w = random.randint(1, 10)  # Random weight between 1 and 10
-        edges.append((u, v, w))
+    # Create a spanning tree to ensure connectivity
+    # Use a random permutation to create a random spanning tree
+    vertices = list(range(n))
+    random.shuffle(vertices)
     
-    # Step 2: Add additional edges with probability p
-    for u in range(n):
-        for v in range(u + 1, n):
-            if random.random() < p:
-                w = random.randint(1, 10)  # Random weight between 1 and 10
-                edges.append((u, v, w))
+    # Connect consecutive vertices in the shuffled order
+    tree_edges = set()
+    for i in range(n - 1):
+        u, v = vertices[i], vertices[i + 1]
+        if u > v:
+            u, v = v, u  # Ensure u < v
+        weight = random.randint(min_weight, max_weight)
+        edges.append((u, v, weight))
+        tree_edges.add((u, v))
+    
+    # Add remaining edges with adjusted probability
+    
+    total_possible = n * (n - 1) // 2
+    remaining_possible = total_possible - (n - 1)
+    
+    if remaining_possible > 0:
+        # Calculate adjusted probability for remaining edges
+        expected_total = p * total_possible
+        expected_remaining = expected_total - (n - 1)
+        
+        if expected_remaining > 0:
+            q = min(1.0, expected_remaining / remaining_possible)
+        else:
+            q = 0.0
+            
+        # Add remaining edges with probability q
+        for u in range(n):
+            for v in range(u + 1, n):
+                if (u, v) not in tree_edges:
+                    if random.random() < q:
+                        weight = random.randint(min_weight, max_weight)
+                        edges.append((u, v, weight))
     
     return edges
