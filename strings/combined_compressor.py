@@ -1,5 +1,5 @@
-from strings.huffman import HuffmanCoder
-from strings.lz77 import LZ77Coder
+from huffman import HuffmanCoder
+from lz77 import LZ77Coder
 
 class CombinedCompressor:
     """
