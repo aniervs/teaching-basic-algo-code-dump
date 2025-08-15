@@ -16,18 +16,9 @@ def distance_sq(p1, p2):
     """Calculates the squared Euclidean distance between two points."""
     return sum([(a - b) ** 2 for a, b in zip(p1, p2)])
 
-# ------------------------------------------------------------------
-# TODO: IMPLEMENT THE FOLLOWING FUNCTION
-# ------------------------------------------------------------------
-
 def naive_knn(all_points, query_point, k):
     """
     Finds the k-nearest neighbors using a simple linear scan.
-
-    **Implementation Steps:**
-    1.  Create a list of `(distance_sq, point)` tuples for every point in `all_points`.
-    2.  Sort this list based on the distances.
-    3.  Return the points from the first `k` tuples in the sorted list.
     """
     # Create list of (distance_sq, point) tuples
     distances = [(distance_sq(query_point, point), point) for point in all_points]
@@ -37,6 +28,32 @@ def naive_knn(all_points, query_point, k):
     
     # Return the first k points
     return [point for _, point in distances[:k]]
+
+def verify_results(kdtree_results, naive_results, query_points):
+    """Verify that both methods return the same results."""
+    if not kdtree_results or not naive_results:
+        return False, 0
+    
+    matches = 0
+    for i in range(len(query_points)):
+        # Sort both result sets by distance to query point for comparison
+        kdtree_sorted = sorted(kdtree_results[i], key=lambda p: distance_sq(query_points[i], p))
+        naive_sorted = sorted(naive_results[i], key=lambda p: distance_sq(query_points[i], p))
+        
+        # Check if the sets of points are the same
+        if len(kdtree_sorted) == len(naive_sorted):
+            all_match = True
+            for j in range(len(kdtree_sorted)):
+                # Compare distances with small tolerance for floating point precision
+                kdtree_dist = distance_sq(query_points[i], kdtree_sorted[j])
+                naive_dist = distance_sq(query_points[i], naive_sorted[j])
+                if abs(kdtree_dist - naive_dist) > 1e-10:
+                    all_match = False
+                    break
+            if all_match:
+                matches += 1
+    
+    return matches == len(query_points), matches
 
 def main():
     """Main function to run the performance comparison."""
@@ -49,50 +66,81 @@ def main():
     print("Building KD-Tree...")
     
     start_build = time.perf_counter()
-    # TODO: Instantiate your KDTree with the generated points.
-    # tree = KDTree(points)
+    tree = KDTree(points)
     end_build = time.perf_counter()
     build_time_ms = (end_build - start_build) * 1000
     print(f"Build time: {build_time_ms:.2f} ms")
 
-    # This is a placeholder for the tree variable
-    tree = None 
-
     kdtree_search_time_ms = 0
-    if tree:
+    kdtree_results = []
+    
+    if tree and tree.root:  # Check that tree was built successfully
         start_kdtree_search = time.perf_counter()
         for q_point in query_points:
-            # TODO: Call your KD-Tree's find_k_nearest_neighbors function.
-            # neighbors = tree.find_k_nearest_neighbors(q_point, K)
-            pass # Placeholder
+            neighbors = tree.find_k_nearest_neighbors(q_point, K)
+            kdtree_results.append(neighbors)
         end_kdtree_search = time.perf_counter()
         kdtree_search_time_ms = (end_kdtree_search - start_kdtree_search) * 1000
         print(f"KD-Tree search time for {NUM_QUERIES} queries: {kdtree_search_time_ms:.2f} ms")
-
+    else:
+        print("Error: KD-Tree was not built successfully!")
+        return
 
     # --- NAIVE SEARCH PERFORMANCE TEST ---
     print("\n--- Naive Search Performance Test ---")
+    naive_results = []
+    
     start_naive_search = time.perf_counter()
     for q_point in query_points:
-        # TODO: Call your naive_knn function.
-        # neighbors = naive_knn(points, q_point, K)
-        pass # Placeholder
+        neighbors = naive_knn(points, q_point, K)
+        naive_results.append(neighbors)
     end_naive_search = time.perf_counter()
     naive_search_time_ms = (end_naive_search - start_naive_search) * 1000
     print(f"Naive search time for {NUM_QUERIES} queries: {naive_search_time_ms:.2f} ms")
-
 
     # --- ANALYSIS ---
     print("\n--- Analysis ---")
     if kdtree_search_time_ms > 0:
         speedup = naive_search_time_ms / kdtree_search_time_ms
-        print(f"KD-Tree search was {speedup:.2f} times faster than naive search.")
+        print(f"KD-Tree search was {speedup:.2f}x faster than naive search.")
+        
+        # Calculate theoretical complexity comparison
+        theoretical_kdtree = NUM_QUERIES * K * (DIM ** 0.5) * (NUM_POINTS ** 0.5)  # Rough estimate
+        theoretical_naive = NUM_QUERIES * NUM_POINTS
+        theoretical_speedup = theoretical_naive / theoretical_kdtree if theoretical_kdtree > 0 else 0
+        print(f"Theoretical speedup estimate: {theoretical_speedup:.2f}x")
+    else:
+        print("KD-Tree search time was too fast to measure accurately.")
+
+    # --- VERIFICATION ---
+    print("\n--- Verification ---")
+    all_correct, matches = verify_results(kdtree_results, naive_results, query_points)
     
-    #TODO:
-    # 1. Verify that both KD-tree and the naive search provide the same set of points (you may need to sort them to compare).
-    # 2. How does the performance gap change as you increase the NUM_POINTS? Why? Make some plots of that (performance gap vs NUM_POINTS)
-    # 3. How does the performance change as you increase the DIM? (e.g., to 10 or 20)? This phenomenon is known as the 'Curse of Dimensionality'. Briefly explain why this happens."
-    # 4. How does increasing 'K' affect the performance of each method?" Also make some plots.
+    print(f"Results match for {matches}/{len(query_points)} queries")
+    if all_correct:
+        print("✓ All results match! Both algorithms are working correctly.")
+    else:
+        print("✗ Some results don't match. Check your implementation.")
+        # Show a sample mismatch for debugging
+        for i in range(min(3, len(query_points))):
+            if i < len(kdtree_results) and i < len(naive_results):
+                kd_dists = [distance_sq(query_points[i], p) for p in kdtree_results[i]]
+                naive_dists = [distance_sq(query_points[i], p) for p in naive_results[i]]
+                print(f"Query {i}: KD-Tree distances: {sorted(kd_dists)[:3]}")
+                print(f"Query {i}: Naive distances: {sorted(naive_dists)[:3]}")
+
+    # --- SUMMARY ---
+    print("\n--- Summary ---")
+    print(f"Dataset: {NUM_POINTS} points in {DIM}D space")
+    print(f"Queries: {NUM_QUERIES} queries for {K} nearest neighbors each")
+    print(f"KD-Tree build time: {build_time_ms:.2f} ms")
+    print(f"KD-Tree search time: {kdtree_search_time_ms:.2f} ms")
+    print(f"Naive search time: {naive_search_time_ms:.2f} ms")
+    print(f"Total KD-Tree time: {build_time_ms + kdtree_search_time_ms:.2f} ms")
+    
+    if kdtree_search_time_ms > 0:
+        total_speedup = naive_search_time_ms / (build_time_ms + kdtree_search_time_ms)
+        print(f"Overall speedup (including build time): {total_speedup:.2f}x")
 
 if __name__ == "__main__":
     main()
